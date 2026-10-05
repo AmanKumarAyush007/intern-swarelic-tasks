@@ -1,0 +1,56 @@
+name: Swarelic Task CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'submissions/**'
+
+jobs:
+  verify:
+    name: Verify Submission
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Detect changed exercise and user
+        id: detect
+        run: |
+          CHANGED=$(git diff --name-only origin/main...HEAD | grep 'submissions/' | head -1)
+          USER=$(echo $CHANGED | cut -d'/' -f2)
+          EXERCISE=$(echo $CHANGED | cut -d'/' -f3)
+          echo "user=$USER" >> $GITHUB_OUTPUT
+          echo "exercise=$EXERCISE" >> $GITHUB_OUTPUT
+          echo "Detected: user=$USER, exercise=$EXERCISE"
+
+      - name: Install dependencies for the exercise
+        run: |
+          python -m pip install --upgrade pip
+          REQ="submissions/${{ steps.detect.outputs.user }}/${{ steps.detect.outputs.exercise }}/requirements.txt"
+          if [ -f "$REQ" ]; then
+            pip install -r "$REQ"
+          else
+            pip install pytest responses requests
+          fi
+
+      - name: Run pytest (exercises 4.2–4.5)
+        if: ${{ steps.detect.outputs.exercise != '4.1' }}
+        run: |
+          SUBMISSION="submissions/${{ steps.detect.outputs.user }}/${{ steps.detect.outputs.exercise }}"
+          if [ -d "$SUBMISSION/tests" ]; then
+            cd "$SUBMISSION"
+            python -m pytest tests/ -v --tb=short
+          fi
+        continue-on-error: false
+
+      - name: Run verifier script
+        run: |
+          python scripts/verify.py \
+            --exercise ${{ steps.detect.outputs.exercise }} \
+            --user ${{ steps.detect.outputs.user }}

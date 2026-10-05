@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Django (for Exercise 4.5)
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# Environment variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Pytest
+.pytest_cache/
+.coverage
+
+# Mentor solutions (never push)
+mentor-solutions/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Mentor Only Files
+MENTOR_GUIDE.md
+GRADING.md
